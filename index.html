@@ -14,6 +14,11 @@
             --google-blue: #8ab4f8; --radius: 16px;
         }
 
+        /* Барлық элементтер шекарадан шықпауы үшін */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             background-color: var(--bg); color: var(--text);
             font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden;
@@ -29,12 +34,11 @@
             position: relative; flex-shrink: 0;
         }
 
-        /* Панель жиналған кездегі түрі */
         .sidebar.collapsed { width: 70px; padding-left: 10px; padding-right: 10px; }
         .sidebar.collapsed .logo span, 
         .sidebar.collapsed .nav-item span:last-child, 
         .sidebar.collapsed .group-title {
-            display: none; /* Жазуларды жасырамыз */
+            display: none; 
         }
         .sidebar.collapsed .nav-item { justify-content: center; padding: 12px; }
         .sidebar.collapsed .logo { justify-content: center; padding: 12px 0; }
@@ -83,7 +87,7 @@
         textarea {
             width: 100%; height: 120px; background: #0b0d11; border: 1px solid #3c4043;
             border-radius: 12px; color: #fff; padding: 16px; font-size: 14px;
-            resize: none; outline: none; margin: 16px 0; box-sizing: border-box;
+            resize: none; outline: none; margin: 16px 0;
         }
 
         .btn-main {
@@ -97,30 +101,52 @@
             padding: 40px; background: radial-gradient(circle at center, #1a1d29, #1c1f26);
             border-radius: 24px; border: 1px solid #3c4043; margin-bottom: 30px;
         }
-        @media (max-width: 900px) { .hero-section { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .hero-section { grid-template-columns: 1fr; padding: 20px; } }
 
         .hero-title {
-            font-family: 'Google Sans', sans-serif; font-size: 40px; font-weight: 700;
-            color: var(--text-bright); line-height: 1.2; margin: 0 0 15px 0;
+            font-family: 'Google Sans', sans-serif; font-size: 36px; font-weight: 700;
+            color: var(--text-bright); line-height: 1.3; margin: 0 0 15px 0;
         }
         .hero-title span { color: var(--accent); }
 
         .hero-stat-card {
             background: rgba(234, 67, 53, 0.1); border: 1px solid #ea4335;
             padding: 15px; border-radius: 12px; color: #ea4335; font-weight: 600; font-size: 14px;
-            margin-top: 20px; display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 20px; display: flex; align-items: flex-start; gap: 8px;
+            line-height: 1.5; word-wrap: break-word;
         }
 
         .math-model-card {
-            background: #0b0d11; border: 1px solid #3c4043; border-radius: 16px; padding: 20px; text-align: center;
+            background: #0b0d11; border: 1px solid #3c4043; border-radius: 16px; padding: 24px; text-align: center;
         }
         .formula { font-family: 'Courier New', monospace; font-size: 24px; color: var(--accent); margin: 15px 0; font-weight: bold; }
 
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .feature-item { background: var(--card); border: 1px solid #303134; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+        /* ТҮЗЕТІЛГЕН ФИЧАЛАР КВАДРАТТАРЫ (Квадраттан шықпау үшін) */
+        .feature-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; 
+        }
+        .feature-item { 
+            background: var(--card); 
+            border: 1px solid #303134; 
+            padding: 16px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: flex-start; /* Мәтін ортаға емес, жоғарыдан басталады */
+            gap: 12px; 
+            line-height: 1.5;
+            word-wrap: break-word; /* Ұзын сөздерді кесіп тастайды */
+            overflow-wrap: break-word;
+        }
+        .feature-item span {
+            font-size: 20px;
+            flex-shrink: 0; /* Иконкалар кішірейіп кетпеуі үшін */
+            margin-top: 2px;
+        }
 
         /* CHART ЖӘНЕ GRID */
-        .chart-wrapper { min-height: 300px; }
+        .chart-wrapper { min-height: 300px; width: 100%; overflow: hidden; }
         #chart-container { height: 250px; width: 100%; position: relative; }
         .analysis-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap:24px; align-items: start; }
         @media (max-width: 900px) { .analysis-grid { grid-template-columns: 1fr; } }
@@ -147,9 +173,10 @@
         <div class="hero-section">
             <div>
                 <h1 class="hero-title">🍀 <span>EduVision AI</span>: Жасанды Интеллект арқылы Оқушы Жүктемесін Оңтайландыру</h1>
-                <p style="font-size: 15px; color: var(--text); line-height: 1.6;">Абай ұлттық мектебінің 7-сынып оқушысы Максим Тоғжанның ғылыми жобасы. Бұл платформа мектеп кестесін автоматты түрде талдап, оқушылардың когнитивті шаршауын болжайды.</p>
+                <p style="font-size: 15px; color: var(--text); line-height: 1.6;">Абай ұлттық мектебі оқушыларының ғылыми жобасы. Бұл платформа мектеп кестесін автоматты түрде талдап, оқушылардың когнитивті шаршауын болжайды.</p>
                 <div class="hero-stat-card">
-                    ⚠️ Суреттен дерек: 4 сабақтан кейін зейін коэффиценті 42%-ға төмендейді!
+                    <span style="flex-shrink: 0;">⚠️</span> 
+                    <div>Суреттен дерек: 4 сабақтан кейін зейін коэффиценті 42%-ға төмендейді!</div>
                 </div>
             </div>
             <div class="math-model-card">
@@ -163,10 +190,10 @@
         <div class="card">
             <h2>Платформаның Мүмкіндіктері</h2>
             <div class="feature-grid">
-                <div class="feature-item"><span>📸</span> OCR: Кесте фотосын автоматты түрде тану</div>
-                <div class="feature-item"><span>📊</span> Нейрондық талдау және болжам</div>
-                <div class="feature-item"><span>✅</span> Оңтайлы кесте ұсыну</div>
-                <div class="feature-item"><span>🚀</span> 91% Дәлдік коэффиценті</div>
+                <div class="feature-item"><span>📸</span> <div>OCR: Кесте фотосын автоматты түрде тану</div></div>
+                <div class="feature-item"><span>📊</span> <div>Нейрондық талдау және болжам</div></div>
+                <div class="feature-item"><span>✅</span> <div>Оңтайлы кесте ұсыну мүмкіндігі</div></div>
+                <div class="feature-item"><span>🚀</span> <div>91% Дәлдік коэффиценті</div></div>
             </div>
         </div>
         
@@ -186,14 +213,14 @@
         
         <div id="res" style="display:none; margin-top:20px;" class="card">
             <div class="analysis-grid">
-                <div id="aiOut" style="font-size:13.5px; line-height: 1.6; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid #303134;"></div>
+                <div id="aiOut" style="font-size:13.5px; line-height: 1.6; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid #303134; word-wrap: break-word;"></div>
                 
                 <div class="chart-wrapper" style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 16px; border: 1px solid #303134;">
                     <h3 id="chart-title" style="margin-top:0; font-size:15px; color:#fff; margin-bottom: 15px;">Танымдық жүктеме динамикасы</h3>
                     <div id="chart-container">
                         <canvas id="ch"></canvas>
                     </div>
-                    <div id="chart-desc" style="margin-top:15px; font-size:12px; border-top:1px solid #333; padding-top:10px;"></div>
+                    <div id="chart-desc" style="margin-top:15px; font-size:12px; border-top:1px solid #333; padding-top:10px; word-wrap: break-word; line-height: 1.5;"></div>
                 </div>
             </div>
         </div>
@@ -213,26 +240,22 @@
 </div>
 
 <script>
-    // SIDEBAR ЖИНАУ (COLLAPSE) ФУНКЦИЯСЫ
     function toggleSidebar() {
         const sb = document.getElementById('sidebar');
         const btn = document.querySelector('.toggle-btn');
         sb.classList.toggle('collapsed');
         
-        // Кнопканың бағытын өзгерту
         if (sb.classList.contains('collapsed')) {
-            btn.innerText = '⟩'; // Оңға
+            btn.innerText = '⟩'; 
         } else {
-            btn.innerText = '⟨'; // Солға
+            btn.innerText = '⟨'; 
         }
         
-        // Панель жиналғанда график қисайып кетпес үшін жаңарту
         setTimeout(() => {
             if(window.cObj) window.cObj.resize();
         }, 300);
     }
 
-    // БЕТТЕРДІ АУЫСТЫРУ
     function switchView(id, el) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-' + id).classList.add('active');
