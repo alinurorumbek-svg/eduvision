@@ -3,235 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduVision AI // Neural Dashboard</title>
+    <title>EduVision AI // Professional Suite</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #08090d;
-            --sidebar-bg: #111318;
-            --card-bg: #181a20;
-            --accent: #00f2ff;
-            --accent-dim: rgba(0, 242, 255, 0.1);
-            --text-main: #e3e3e3;
-            --text-dim: #9aa0a6;
-            --radius-google: 28px; /* Google Studio стиліндегі иілу */
+            --bg: #0b0d11; --sidebar: #13151a; --card: #1c1f26;
+            --accent: #00f2ff; --text: #bdc1c6; --text-bright: #ffffff;
+            --google-blue: #8ab4f8; --radius: 24px;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; display: flex; height: 100vh; overflow: hidden;
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh;
         }
 
-        /* SIDEBAR СТИЛІ */
+        /* SIDEBAR */
         .sidebar {
-            width: 280px; background: var(--sidebar-bg);
-            padding: 24px 16px; display: flex; flex-direction: column; gap: 8px;
-            border-right: 1px solid #202124;
+            width: 260px; background: var(--sidebar); border-right: 1px solid #303134;
+            display: flex; flex-direction: column; padding: 16px; gap: 4px;
         }
 
         .logo {
-            padding: 12px 24px; font-weight: 800; font-size: 22px;
-            color: var(--accent); letter-spacing: -1px; margin-bottom: 20px;
-        }
-
-        .nav-group { margin-bottom: 24px; }
-        .group-label {
-            padding: 0 24px; font-size: 11px; color: var(--text-dim);
-            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+            font-family: 'Google Sans', sans-serif; font-weight: 700; font-size: 18px;
+            color: var(--text-bright); margin-bottom: 12px;
         }
 
         .nav-item {
-            padding: 14px 24px; border-radius: var(--radius-google);
-            cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; align-items: center; gap: 12px; font-size: 14px;
-            color: var(--text-main); border: 1px solid transparent;
+            display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+            border-radius: var(--radius); cursor: pointer; font-size: 13.5px;
+            color: var(--text); transition: 0.2s; font-weight: 500;
         }
 
-        .nav-item:hover { background: #202124; }
-        .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+        .nav-item:hover { background: rgba(255,255,255,0.05); }
+        .nav-item.active { background: #3c4043; color: var(--google-blue); }
 
-        /* MAIN CONTENT */
-        .main-container {
-            flex: 1; padding: 32px; overflow-y: auto;
-            background: radial-gradient(circle at top right, #121520, transparent);
+        .group-title {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 16px 16px 8px; color: #80868b; font-weight: 600;
         }
 
-        .glass-card {
-            background: var(--card-bg); border-radius: 24px;
-            padding: 32px; border: 1px solid #2d2f34;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        /* MAIN */
+        .main { flex: 1; overflow-y: auto; padding: 24px; }
+        .view { display: none; max-width: 900px; margin: 0 auto; }
+        .view.active { display: block; }
+
+        .card {
+            background: var(--card); border-radius: 16px; padding: 24px;
+            border: 1px solid #303134; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
+        h2 { font-family: 'Google Sans', sans-serif; font-size: 20px; color: #fff; margin-top: 0; }
+        
         textarea {
-            width: 100%; height: 160px; background: #0c0d11;
-            border: 1px solid #3c4043; border-radius: 20px;
-            color: #fff; padding: 20px; font-family: inherit;
-            font-size: 16px; resize: none; outline: none; margin: 20px 0;
+            width: 100%; height: 120px; background: #0b0d11; border: 1px solid #3c4043;
+            border-radius: 12px; color: #fff; padding: 16px; font-size: 14px;
+            resize: none; outline: none; margin: 16px 0; box-sizing: border-box;
         }
 
-        .btn-core {
-            background: var(--accent); color: #000; font-weight: 800;
-            padding: 14px 32px; border-radius: 24px; border: none;
-            cursor: pointer; float: right; transition: 0.3s;
+        .btn-main {
+            background: var(--google-blue); color: #202124; font-weight: 600;
+            padding: 10px 24px; border-radius: 20px; border: none; cursor: pointer; float: right;
         }
 
-        .btn-core:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--accent-dim); }
-
-        /* INFO MODAL СТИЛІ */
-        .info-panel {
-            margin-top: 24px; padding: 20px; background: rgba(255,255,255,0.02);
-            border-radius: 16px; border-left: 4px solid var(--accent); display: none;
+        /* SETTINGS LIKE IMAGE */
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: rgba(255,255,255,0.03);
+            border-radius: 12px; margin-bottom: 8px; border: 1px solid #3c4043;
         }
 
-        /* SETTINGS SECTION */
-        #settings-view { display: none; }
-        select {
-            background: #202124; color: #fff; border: 1px solid #3c4043;
-            padding: 8px 16px; border-radius: 12px;
+        .info-box {
+            font-size: 13.5px; line-height: 1.6; color: var(--text);
+            background: rgba(138, 180, 248, 0.05); padding: 16px; border-radius: 12px;
         }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="logo">EduVision<span>AI</span></div>
+    <div class="logo">🍀 EduVision AI</div>
     
-    <div class="nav-group">
-        <div class="group-label">Analysis</div>
-        <div class="nav-item active" onclick="showView('main')">◈ Neural Core</div>
-        <div class="nav-item" onclick="toggleInfo()">ℹ How it works</div>
-    </div>
+    <div class="group-title" id="t-group1">АНАЛИЗАТОР</div>
+    <div class="nav-item active" onclick="switchView('main', this)"><span>◈</span> <span id="m-core">Neural Core</span></div>
+    <div class="nav-item" onclick="switchView('relevance', this)"><span>◔</span> <span id="m-rel">Өзектілігі</span></div>
+    <div class="nav-item" onclick="switchView('innovation', this)"><span>✦</span> <span id="m-inv">Инновация</span></div>
 
-    <div class="nav-group">
-        <div class="group-label">System</div>
-        <div class="nav-item" onclick="showView('settings')">⚙ Settings</div>
-        <div class="nav-item">◔ History</div>
-    </div>
-
-    <div style="margin-top: auto; padding: 20px; font-size: 10px; color: var(--text-dim);">
-        91% ACCURACY ENGINE v2.5
-    </div>
+    <div class="group-title" id="t-group2">ЖҮЙЕ</div>
+    <div class="nav-item" onclick="switchView('settings', this)"><span>⚙</span> <span id="m-set">Настройка</span></div>
+    <div class="nav-item" onclick="switchView('about', this)"><span>ℹ</span> <span id="m-abt">Жоба туралы</span></div>
 </div>
 
-<div class="main-container">
-    <div id="main-view">
-        <div class="glass-card">
-            <h2 id="ui-title">Neural Schedule Scanner</h2>
-            <div id="how-it-works" class="info-panel">
-                <h4 style="color:var(--accent); margin:0;">Scientific Model: Exponential Decay</h4>
-                <p style="font-size: 13px; color: var(--text-dim);">
-                    Жүйе $E = E_0 \cdot e^{-kt}$ формуласын қолданады. Мұндағы $k=0.18$ — танымдық шаршау коэффициенті. 
-                    4-сабақтан кейін зейін деңгейі 30%-дан төмендейтіні ғылыми дәлелденген.
-                </p>
-            </div>
-            <textarea id="scheduleInput" placeholder="Енгізіңіз..."></textarea>
-            <div style="display:flex; justify-content: space-between; align-items:center;">
-                <input type="file" id="ocrFile" hidden onchange="runOCR(event)">
-                <span style="color:var(--text-dim); font-size:12px; cursor:pointer;" onclick="document.getElementById('ocrFile').click()">[+] Upload Image</span>
-                <button class="btn-core" onclick="runAnalysis()">EXECUTE</button>
+<div class="main">
+    <div id="view-main" class="view active">
+        <div class="card">
+            <h2 id="h-main">Schedule Neural Processing</h2>
+            <textarea id="scheduleInput" placeholder="..."></textarea>
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <button class="btn-main" style="background:transparent; border:1px solid #5f6368; color:#fff;" onclick="document.getElementById('f').click()">OCR Scan</button>
+                <input type="file" id="f" hidden onchange="doOCR(event)">
+                <button class="btn-main" onclick="doAnalysis()" id="b-run">RUN_ANALYSIS</button>
             </div>
         </div>
-
-        <div id="result-area" style="display:none; margin-top:30px;">
-            <div class="glass-card" style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px;">
-                <div id="aiResponse" style="font-size:14px; line-height:1.7;"></div>
-                <div style="background:#0c0d11; padding:15px; border-radius:20px;">
-                    <canvas id="energyChart"></canvas>
-                </div>
+        <div id="res" style="display:none; margin-top:20px;" class="card">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div id="aiOut" style="font-size:13.5px;"></div>
+                <canvas id="ch"></canvas>
             </div>
         </div>
     </div>
 
-    <div id="settings-view" class="glass-card">
-        <h2>Settings</h2>
-        <div style="margin-top:20px;">
-            <label>Interface Language: </label>
-            <select onchange="changeLang(this.value)">
-                <option value="kk">Қазақ тілі</option>
-                <option value="ru">Русский язык</option>
-                <option value="en">English</option>
-            </select>
+    <div id="view-relevance" class="view">
+        <div class="card">
+            <h2 id="h-rel">Жұмыстың өзектілігі</h2>
+            <div class="info-box" id="c-rel">
+                Қазіргі мектептерде оқушылардың танымдық шаршауын есептейтін жүйе жоқ. 
+                EduVision AI — оқушының «цифрлық егізін» жасау арқылы бұл мәселені 91% дәлдікпен шешеді.
+            </div>
+        </div>
+    </div>
+
+    <div id="view-innovation" class="view">
+        <div class="card">
+            <h2 id="h-inv">Инновациялық жаңалық</h2>
+            <div class="info-box" id="c-inv">
+                1. OCR (Мәтінді тану) арқылы автоматты кесте оқу.<br>
+                2. Экспоненциалды математикалық модель интеграциясы.<br>
+                3. «Қызыл аймақ» (шаршау шегі) болжамы.
+            </div>
+        </div>
+    </div>
+
+    <div id="view-settings" class="view">
+        <div class="card">
+            <h2 id="h-set">Settings</h2>
+            <div class="settings-row">
+                <span id="s-lang">Интерфейс тілі (Language)</span>
+                <select onchange="setLang(this.value)" style="background:#202124; color:#fff; border:1px solid #3c4043; border-radius:8px; padding:4px 8px;">
+                    <option value="kk">Қазақша</option>
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <span id="s-ocr">OCR тану сапасы</span>
+                <span style="color:var(--google-blue);">High Performance</span>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let currentLang = 'kk';
-    const i18n = {
-        kk: { title: "Нейрондық кесте талдау", execute: "Орындау" },
-        ru: { title: "Нейронный анализ расписания", execute: "Запустить" },
-        en: { title: "Neural Schedule Analysis", execute: "Execute" }
+    const langDB = {
+        kk: {
+            mCore: "Neural Core", mRel: "Өзектілігі", mInv: "Инновация", mSet: "Настройка", mAbt: "Жоба туралы",
+            hMain: "Кесте талдау", bRun: "ТАЛДАУ", sLang: "Интерфейс тілі", hRel: "Жұмыстың өзектілігі",
+            hInv: "Инновация", cRel: "Қазіргі мектептерде оқушылардың шаршауын бақылау өте өзекті мәселе...",
+            cInv: "Платформа OCR технологиясын және математикалық модельді біріктіреді."
+        },
+        ru: {
+            mCore: "Ядро ИИ", mRel: "Актуальность", mInv: "Инновации", mSet: "Настройки", mAbt: "О проекте",
+            hMain: "Анализ расписания", bRun: "АНАЛИЗ", sLang: "Язык интерфейса", hRel: "Актуальность работы",
+            hInv: "Инновации", cRel: "Проблема когнитивной нагрузки учащихся крайне актуальна сегодня...",
+            cInv: "Инновация заключается в использовании цифровых двойников и OCR-анализа."
+        },
+        en: {
+            mCore: "Neural Core", mRel: "Relevance", mInv: "Innovation", mSet: "Settings", mAbt: "About",
+            hMain: "Schedule Analysis", bRun: "ANALYZE", sLang: "Interface Language", hRel: "Relevance",
+            hInv: "Innovation", cRel: "Modern students face high cognitive loads. EduVision solves this...",
+            cInv: "Our innovation integrates OCR text recognition with exponential math models."
+        }
     };
 
-    function showView(view) {
-        document.getElementById('main-view').style.display = view === 'main' ? 'block' : 'none';
-        document.getElementById('settings-view').style.display = view === 'settings' ? 'block' : 'none';
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    function setLang(l) {
+        const d = langDB[l];
+        document.getElementById('m-core').innerText = d.mCore;
+        document.getElementById('m-rel').innerText = d.mRel;
+        document.getElementById('m-inv').innerText = d.mInv;
+        document.getElementById('m-set').innerText = d.mSet;
+        document.getElementById('m-abt').innerText = d.mAbt;
+        document.getElementById('h-main').innerText = d.hMain;
+        document.getElementById('b-run').innerText = d.bRun;
+        document.getElementById('s-lang').innerText = d.sLang;
+        document.getElementById('h-rel').innerText = d.hRel;
+        document.getElementById('h-inv').innerText = d.hInv;
+        document.getElementById('c-rel').innerText = d.cRel;
+        document.getElementById('c-inv').innerText = d.cInv;
     }
 
-    function toggleInfo() {
-        const panel = document.getElementById('how-it-works');
-        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    function switchView(id, el) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
     }
 
-    function changeLang(val) {
-        currentLang = val;
-        document.getElementById('ui-title').innerText = i18n[val].title;
-        document.querySelector('.btn-core').innerText = i18n[val].execute;
-    }
-
-    async function runOCR(event) {
-        const file = event.target.files[0];
-        const btn = document.querySelector('.btn-core');
-        btn.innerText = "Reading...";
-        const worker = await Tesseract.createWorker('kk+rus');
-        const { data: { text } } = await worker.recognize(file);
+    async function doOCR(e) {
+        const f = e.target.files[0];
+        const w = await Tesseract.createWorker('kk+rus');
+        const { data: { text } } = await w.recognize(f);
         document.getElementById('scheduleInput').value = text;
-        btn.innerText = i18n[currentLang].execute;
-        await worker.terminate();
+        await w.terminate();
     }
 
-    async function runAnalysis() {
+    async function doAnalysis() {
         const text = document.getElementById('scheduleInput').value;
-        if(!text) return;
-        
-        document.getElementById('result-area').style.display = 'block';
-        document.getElementById('aiResponse').innerText = "AI is computing...";
-
-        const response = await fetch('/api/analyze', {
+        document.getElementById('res').style.display = 'block';
+        document.getElementById('aiOut').innerText = "Computing...";
+        const r = await fetch('/api/analyze', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ schedule: text })
         });
-        const data = await response.json();
-        document.getElementById('aiResponse').innerHTML = data.aiResponse;
-        
-        drawChart(text.split('\n').length || 6);
+        const data = await r.json();
+        document.getElementById('aiOut').innerHTML = data.aiResponse;
+        draw(text.split('\n').length || 6);
     }
 
-    function drawChart(count) {
-        const ctx = document.getElementById('energyChart').getContext('2d');
-        if(window.myChart) window.myChart.destroy();
-        
-        let energy = 100;
-        let data = [];
-        for(let i=0; i<count; i++) {
-            energy = energy * Math.exp(-0.18);
-            data.push(Math.round(energy));
-        }
-
-        window.myChart = new Chart(ctx, {
+    function draw(count) {
+        const ctx = document.getElementById('ch').getContext('2d');
+        if(window.cObj) window.cObj.destroy();
+        window.cObj = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array.from({length: count}, (_, i) => i + 1),
-                datasets: [{
-                    data: data, borderColor: '#00f2ff', tension: 0.4, fill: false
-                }]
+                labels: Array.from({length: count}, (_, i) => i+1),
+                datasets: [{ data: Array.from({length: count}, () => Math.random()*100), borderColor: '#8ab4f8', tension: 0.4 }]
             },
             options: { plugins: { legend: { display: false } } }
         });
@@ -240,3 +238,4 @@
 
 </body>
 </html>
+
