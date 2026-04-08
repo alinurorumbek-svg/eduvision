@@ -1,25 +1,29 @@
 export default async function handler(req, res) {
-    // Кілт Vercel-дің ішінде жасырын тұрады
-    const API_KEY = process.env.OPENAI_API_KEY; 
-
+    // Енді бұл жерде Gemini кілті қолданылады
+    const API_KEY = process.env.GEMINI_API_KEY; 
     const { schedule } = req.body;
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [{ role: "user", content: "Талдау жаса: " + schedule }]
+                contents: [{
+                    parts: [{
+                        text: `Сен мектеп психологысың. Мына сабақ кестесін талдап, оқушының шаршау деңгейі мен жүктемесі туралы қазақша қысқаша кеңес бер: ${schedule}`
+                    }]
+                }]
             })
         });
 
         const data = await response.json();
-        res.status(200).json({ aiResponse: data.choices[0].message.content });
+        // Gemini-ден келген жауапты өңдеу
+        const aiResponse = data.candidates[0].content.parts[0].text;
+        
+        res.status(200).json({ aiResponse });
     } catch (error) {
-        res.status(500).json({ error: "Серверде қате болды" });
+        res.status(500).json({ error: "Gemini API-де қате болды" });
     }
 }
