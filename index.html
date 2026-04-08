@@ -92,6 +92,22 @@
             margin-top: 20px; font-size: 13px; color: var(--google-blue); line-height: 1.5;
             padding-top: 15px; border-top: 1px solid #303134;
         }
+
+        /* OPTIMAL SCHEDULE UI */
+        .opt-box {
+            grid-column: 1 / -1; /* Екі бағанды да алып жатады */
+            margin-top: 10px; padding: 16px 20px;
+            background: rgba(52, 168, 83, 0.05); /* Жұмсақ жасыл фон */
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            border-radius: 16px; display: none;
+        }
+        .opt-title { color: #34a853; font-weight: 600; margin-bottom: 14px; font-size: 14.5px; }
+        .opt-list { display: flex; gap: 10px; flex-wrap: wrap; }
+        .opt-item { 
+            background: #1c1f26; padding: 8px 16px; border-radius: 20px; 
+            font-size: 13px; border: 1px solid #3c4043; color: #fff;
+            display: flex; align-items: center; gap: 6px;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +147,11 @@
                         <canvas id="ch"></canvas>
                     </div>
                     <div id="chart-desc" class="chart-desc-text"></div>
+                </div>
+
+                <div id="opt-box" class="opt-box">
+                    <div class="opt-title" id="opt-title">✅ Нейрожелі ұсынатын оңтайлы кесте:</div>
+                    <div class="opt-list" id="opt-list"></div>
                 </div>
             </div>
         </div>
@@ -191,13 +212,15 @@
 </div>
 
 <script>
-    // ТІЛДІК ПАКЕТ ЖАҢАРТЫЛДЫ (Настройка іші толық аударылады)
+    let currentLang = 'kk'; // Глобалды тіл айнымалысы
+
     const langDB = {
         kk: {
             mCore: "Neural Core", mRel: "Өзектілігі", mInv: "Инновация", mSet: "Баптаулар", mAbt: "Жоба туралы",
             hMain: "Кесте талдау", bRun: "ТАЛДАУ", hRel: "Жұмыстың өзектілігі", hInv: "Инновация",
             sLang: "Интерфейс тілі", sOcr: "OCR тану сапасы", sOcrVal: "Жоғары (Нейрондық)", 
             sTheme: "Тақырып (Theme)", sThemeVal: "Қараңғы", chartTitle: "Танымдық жүктеме динамикасы",
+            optTitle: "✅ Нейрожелі ұсынатын оңтайлы кесте:",
             cRel: "Қазіргі мектептерде оқушылардың шаршауын бақылау өте өзекті мәселе...",
             cInv: "Платформа OCR технологиясын және математикалық модельді біріктіреді."
         },
@@ -206,6 +229,7 @@
             hMain: "Анализ расписания", bRun: "АНАЛИЗ", hRel: "Актуальность работы", hInv: "Инновации",
             sLang: "Язык интерфейса", sOcr: "Качество распознавания OCR", sOcrVal: "Высокое (Нейросеть)",
             sTheme: "Тема оформления", sThemeVal: "Тёмная", chartTitle: "Динамика когнитивной нагрузки",
+            optTitle: "✅ Рекомендуемое оптимальное расписание:",
             cRel: "Проблема когнитивной нагрузки учащихся крайне актуальна сегодня...",
             cInv: "Инновация заключается в использовании цифровых двойников и OCR-анализа."
         },
@@ -214,20 +238,48 @@
             hMain: "Schedule Analysis", bRun: "ANALYZE", hRel: "Relevance", hInv: "Innovation",
             sLang: "Interface Language", sOcr: "OCR Recognition Quality", sOcrVal: "High Performance",
             sTheme: "App Theme", sThemeVal: "Dark Mode", chartTitle: "Cognitive Load Dynamics",
+            optTitle: "✅ AI Recommended Optimal Schedule:",
             cRel: "Modern students face high cognitive loads. EduVision solves this...",
             cInv: "Our innovation integrates OCR text recognition with exponential math models."
         }
     };
 
+    // Оңтайлы кесте мәліметтері (Тілдер бойынша)
+    const optimalSchedules = {
+        kk: [
+            {n: "Алгебра / Математика", c: "#ea4335", type: "Күрделі"},
+            {n: "Қазақ тілі / Әдебиет", c: "#fbbc05", type: "Орташа"},
+            {n: "Дене шынықтыру", c: "#34a853", type: "Миды тынықтыру"},
+            {n: "Физика / Химия", c: "#ea4335", type: "Күрделі"},
+            {n: "Тарих / Биология", c: "#fbbc05", type: "Орташа"},
+            {n: "Информатика / Өнер", c: "#34a853", type: "Жеңіл"}
+        ],
+        ru: [
+            {n: "Алгебра / Математика", c: "#ea4335", type: "Сложно"},
+            {n: "Русский язык", c: "#fbbc05", type: "Средне"},
+            {n: "Физкультура", c: "#34a853", type: "Разгрузка"},
+            {n: "Физика / Химия", c: "#ea4335", type: "Сложно"},
+            {n: "История", c: "#fbbc05", type: "Средне"},
+            {n: "Информатика / ИЗО", c: "#34a853", type: "Легко"}
+        ],
+        en: [
+            {n: "Math / Algebra", c: "#ea4335", type: "Hard"},
+            {n: "English / Language", c: "#fbbc05", type: "Medium"},
+            {n: "Physical Education", c: "#34a853", type: "Relaxation"},
+            {n: "Science / Physics", c: "#ea4335", type: "Hard"},
+            {n: "History / Geography", c: "#fbbc05", type: "Medium"},
+            {n: "Art / IT", c: "#34a853", type: "Easy"}
+        ]
+    };
+
     function setLang(l) {
+        currentLang = l;
         const d = langDB[l];
-        // Menu
         document.getElementById('m-core').innerText = d.mCore;
         document.getElementById('m-rel').innerText = d.mRel;
         document.getElementById('m-inv').innerText = d.mInv;
         document.getElementById('m-set').innerText = d.mSet;
         document.getElementById('m-abt').innerText = d.mAbt;
-        // Titles & Text
         document.getElementById('h-main').innerText = d.hMain;
         document.getElementById('b-run').innerText = d.bRun;
         document.getElementById('h-rel').innerText = d.hRel;
@@ -236,7 +288,7 @@
         document.getElementById('c-rel').innerText = d.cRel;
         document.getElementById('c-inv').innerText = d.cInv;
         document.getElementById('chart-title').innerText = d.chartTitle;
-        // Settings inner
+        document.getElementById('opt-title').innerText = d.optTitle;
         document.getElementById('s-lang').innerText = d.sLang;
         document.getElementById('s-ocr').innerText = d.sOcr;
         document.getElementById('s-ocr-val').innerText = d.sOcrVal;
@@ -287,41 +339,58 @@
         const ctx = canvas.getContext('2d');
         if(window.cObj) window.cObj.destroy();
 
-        // 1. Градиентті фон жасау (Асты көкшіл болып келеді)
         let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(138, 180, 248, 0.4)'); // Көкшіл мөлдір
-        gradient.addColorStop(1, 'rgba(138, 180, 248, 0.0)'); // Толық мөлдір
+        gradient.addColorStop(0, 'rgba(138, 180, 248, 0.4)');
+        gradient.addColorStop(1, 'rgba(138, 180, 248, 0.0)');
 
         let energy = 100;
         let dataValues = [];
         let pointColors = [];
         let redZones = [];
 
+        // Егер сабақ саны 6-дан асса, 6-ға дейін шектейміз (оптималды кесте үшін)
+        let safeCount = count > 6 ? 6 : count;
+
         for(let i=0; i<count; i++) {
             energy = energy * Math.exp(-0.18);
             let val = Math.round(energy);
             dataValues.push(val);
 
-            // Нүктелердің түсін анықтау: 35-тен төмен болса қызыл болады
             if (val < 35) {
-                pointColors.push('#ea4335'); // Қызыл (Қауіпті)
+                pointColors.push('#ea4335');
                 redZones.push(i + 1);
             } else {
-                pointColors.push('#8ab4f8'); // Негізгі көк
+                pointColors.push('#8ab4f8');
             }
         }
 
-        // ОПИСАНИЕ
         const descBox = document.getElementById('chart-desc');
         if (redZones.length > 0) {
-            descBox.innerHTML = `⚠️ <b>Ескерту:</b> ${redZones.join(', ')}-сабақтарда оқушының зейіні 35%-дан төмендейді. Математикалық модель (k=0.18) бойынша бұл уақытта когнитивті жүктемені азайту қажет.`;
+            descBox.innerHTML = `⚠️ <b>Ескерту:</b> ${redZones.join(', ')}-сабақтарда оқушының зейіні 35%-дан төмендейді. Математикалық модель бойынша бұл уақытта когнитивті жүктемені азайту қажет.`;
             descBox.style.color = "#ea4335";
         } else {
             descBox.innerHTML = `✅ <b>Оңтайлы:</b> Кесте қалыпты. Экспоненциалды төмендеу шегі (Қызыл аймақ) бұзылған жоқ.`;
             descBox.style.color = "#34a853";
         }
 
-        // ЛИНЕЙНЫЙ (СЫЗЫҚТЫҚ) ГРАФИК
+        // ОПТИМАЛДЫ КЕСТЕНІ ТОЛТЫРУ
+        const optBox = document.getElementById('opt-box');
+        const optList = document.getElementById('opt-list');
+        optList.innerHTML = '';
+        
+        const scheduleData = optimalSchedules[currentLang];
+        for(let i=0; i<safeCount; i++) {
+            const item = scheduleData[i];
+            optList.innerHTML += `
+                <div class="opt-item">
+                    <span style="color:${item.c}; font-weight:bold;">${i+1}.</span> 
+                    ${item.n} 
+                    <span style="color:#80868b; font-size:11px;">(${item.type})</span>
+                </div>
+            `;
+        }
+        optBox.style.display = 'block'; // Графиктің астында пайда болады
+
         window.cObj = new Chart(ctx, {
             type: 'line',
             data: {
@@ -332,8 +401,8 @@
                     backgroundColor: gradient,
                     borderColor: '#8ab4f8',
                     borderWidth: 3,
-                    fill: true, // Астын градиентпен бояу
-                    tension: 0.4, // Сызықты жұмсақ (smooth) қылу
+                    fill: true,
+                    tension: 0.4,
                     pointBackgroundColor: pointColors,
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
@@ -344,28 +413,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1c1f26',
-                        titleColor: '#fff',
-                        bodyColor: '#bdc1c6',
-                        padding: 10,
-                        borderColor: '#303134',
-                        borderWidth: 1
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        max: 100, 
-                        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, 
-                        ticks: { font: { size: 11 }, color: '#80868b' } 
-                    },
-                    x: { 
-                        grid: { display: false }, 
-                        ticks: { font: { size: 11 }, color: '#80868b' } 
-                    }
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { font: { size: 11 }, color: '#80868b' } },
+                    x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#80868b' } }
                 }
             }
         });
