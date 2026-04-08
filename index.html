@@ -2,47 +2,228 @@
 <html lang="kk">
 <head>
     <meta charset="UTF-8">
-    <title>EduVision AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduVision AI // Cyber-Psychology</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
-        body { background: #020409; color: #c8deff; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
-        .card { background: #0d1526; border: 1px solid #1a2a4a; padding: 25px; border-radius: 15px; max-width: 600px; width: 100%; }
-        textarea { width: 100%; height: 100px; background: #000; color: #fff; border: 1px solid #1a2a4a; padding: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #00d4ff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #status { color: #00d4ff; margin-top: 10px; font-size: 14px; }
+        /* НЕГІЗГІ ПАЛИТРА (DARK BY DEFAULT) */
+        :root {
+            --bg: #0a0a12;
+            --card-bg: rgba(16, 16, 28, 0.8);
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff00ff;
+            --text-color: #00f2ff;
+            --border-color: #1f1f3a;
+            --btn-grad: linear-gradient(90deg, #ff00ff, #00f2ff);
+            --input-bg: rgba(0, 0, 0, 0.6);
+        }
+
+        /* LIGHT MODE (АҚ ТАҚЫРЫПҚА АДАПТАЦИЯ) */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f0f2f5;
+                --card-bg: rgba(255, 255, 255, 0.9);
+                --neon-blue: #0072ff;
+                --neon-pink: #d100d1;
+                --text-color: #1a1a2e;
+                --border-color: #d1d1e9;
+                --btn-grad: linear-gradient(90deg, #0072ff, #00c6ff);
+                --input-bg: #ffffff;
+            }
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace; /* Киберпанк стиліндегі шрифт */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 255, 0.05) 0%, transparent 20%);
+        }
+
+        .cyber-container {
+            width: 90%;
+            max-width: 650px;
+            padding: 20px;
+        }
+
+        .cyber-card {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue), inset 0 0 5px var(--neon-blue);
+            border-radius: 5px; /* Бұрыштары тік болғаны стильдірек */
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 95% 100%, 0 100%); /* "Кесілген" бұрыш */
+        }
+
+        .cyber-card::before {
+            content: "SYSTEM_ONLINE";
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 10px;
+            opacity: 0.5;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px var(--neon-pink);
+            border-bottom: 1px solid var(--neon-pink);
+            display: inline-block;
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: var(--input-bg);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--btn-grad);
+            border: none;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+        }
+
+        button:hover {
+            box-shadow: 0 0 20px var(--neon-pink);
+            letter-spacing: 3px;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--neon-pink);
+        }
+
+        .result-area {
+            display: none;
+            margin-top: 30px;
+            border-top: 2px dashed var(--neon-blue);
+            padding-top: 20px;
+        }
+
+        #aiText {
+            font-size: 14px;
+            line-height: 1.6;
+            background: rgba(255, 0, 255, 0.05);
+            padding: 15px;
+            border-right: 3px solid var(--neon-pink);
+        }
+
+        .chart-box {
+            height: 250px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>EduVision AI: Кесте талдау</h2>
-        <textarea id="userInput" placeholder="1. Математика, 2. Физика..."></textarea>
-        <button onclick="sendToAI()">AI ТАЛДАУ ЖАСАУ</button>
-        <div id="status"></div>
-        <div id="aiText" style="margin-top:20px;"></div>
+
+<div class="cyber-container">
+    <div class="cyber-card">
+        <h2>EDU_VISION.v2</h2>
+        <textarea id="userInput" placeholder="[INPUT SCHEDULE DATA]..."></textarea>
+        <button onclick="sendToAI()">EXECUTE ANALYSIS</button>
+        <div id="status">READY_TO_SCAN</div>
+
+        <div class="result-area" id="resultArea">
+            <div id="aiText"></div>
+            <div class="chart-box">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        async function sendToAI() {
-            const text = document.getElementById('userInput').value;
-            const status = document.getElementById('status');
-            if(!text) return alert("Кестені енгізіңіз");
+<script>
+    let myChart = null;
 
-            status.innerText = "⏳ AI ойлануда...";
+    async function sendToAI() {
+        const text = document.getElementById('userInput').value;
+        const status = document.getElementById('status');
+        const resultArea = document.getElementById('resultArea');
+        const aiTextDiv = document.getElementById('aiText');
 
-            try {
-                const response = await fetch('/api/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ schedule: text })
-                });
+        if (!text) return;
 
-                const data = await response.json();
-                document.getElementById('aiText').innerHTML = "<b>AI Жауабы:</b><br>" + data.aiResponse;
-                status.innerText = "✅ Дайын!";
-            } catch (e) {
-                status.innerText = "❌ Қате: Сервер байланысы жоқ";
-            }
+        status.innerText = ">> SCANNING_NEURAL_NETWORKS...";
+        
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ schedule: text })
+            });
+
+            const data = await response.json();
+            
+            resultArea.style.display = 'block';
+            aiTextDiv.innerHTML = `[DATA_RECEIVED]: <br><br>${data.aiResponse}`;
+            
+            drawCyberChart();
+            status.innerText = ">> ANALYSIS_COMPLETE.";
+        } catch (e) {
+            status.innerText = ">> SYSTEM_ERROR_UNABLE_TO_CONNECT.";
         }
-    </script>
+    }
+
+    function drawCyberChart() {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        if (myChart) myChart.destroy();
+
+        const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const color = isLight ? '#0072ff' : '#00f2ff';
+
+        myChart = new Chart(ctx, {
+            type: 'bar', // Киберпанк стилінде бағанды график жақсы көрінеді
+            data: {
+                labels: ['1', '2', '3', '4', '5', '6'],
+                datasets: [{
+                    label: 'LOAD_LEVEL',
+                    data: [30, 45, 75, 95, 80, 100],
+                    backgroundColor: color,
+                    borderColor: '#ff00ff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { ticks: { color: color }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                    x: { ticks: { color: color }, grid: { display: false } }
+                }
+            }
+        });
+    }
+</script>
+
 </body>
 </html>
