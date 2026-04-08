@@ -47,7 +47,7 @@
 
         /* MAIN */
         .main { flex: 1; overflow-y: auto; padding: 24px; }
-        .view { display: none; max-width: 900px; margin: 0 auto; }
+        .view { display: none; max-width: 950px; margin: 0 auto; }
         .view.active { display: block; }
 
         .card {
@@ -80,7 +80,25 @@
             background: rgba(138, 180, 248, 0.05); padding: 16px; border-radius: 12px;
         }
 
-        #chart-container { height: 250px; margin-top: 20px; }
+        /* CHART UI */
+        .chart-wrapper {
+            background: rgba(255,255,255,0.02); padding: 20px;
+            border-radius: 16px; border: 1px solid #303134;
+        }
+        
+        #chart-container { height: 220px; width: 100%; }
+
+        .legend-box {
+            display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;
+            font-size: 12px; color: var(--text); border-bottom: 1px solid #303134; padding-bottom: 12px;
+        }
+        
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        .chart-desc-text {
+            margin-top: 12px; font-size: 13px; color: var(--google-blue); line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -109,11 +127,24 @@
                 <button class="btn-main" onclick="doAnalysis()" id="b-run">RUN_ANALYSIS</button>
             </div>
         </div>
+        
         <div id="res" style="display:none; margin-top:20px;" class="card">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items: start;">
-                <div id="aiOut" style="font-size:13.5px; line-height: 1.6;"></div>
-                <div id="chart-container">
-                    <canvas id="ch"></canvas>
+            <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:24px; align-items: start;">
+                <div id="aiOut" style="font-size:13.5px; line-height: 1.6; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid #303134;"></div>
+                
+                <div class="chart-wrapper">
+                    <h3 style="margin-top:0; font-size:15px; color:#fff; margin-bottom: 15px;">Танымдық жүктеме графигі</h3>
+                    <div id="chart-container">
+                        <canvas id="ch"></canvas>
+                    </div>
+                    
+                    <div class="legend-box">
+                        <div class="legend-item"><div class="legend-color" style="background:#34a853;"></div> Оңтайлы (>70%)</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#fbbc05;"></div> Орташа (35-70%)</div>
+                        <div class="legend-item"><div class="legend-color" style="background:#ea4335;"></div> Қызыл аймақ (<35%)</div>
+                    </div>
+
+                    <div id="chart-desc" class="chart-desc-text"></div>
                 </div>
             </div>
         </div>
@@ -155,10 +186,6 @@
                 <span id="s-ocr">OCR тану сапасы</span>
                 <span style="color:var(--google-blue); font-weight: 600;">High Performance (Neural)</span>
             </div>
-            <div class="settings-row">
-                <span id="s-theme">Қараңғы тақырып</span>
-                <span style="color:var(--google-blue);">Қосулы</span>
-            </div>
         </div>
     </div>
 
@@ -174,6 +201,7 @@
 </div>
 
 <script>
+    // ТІЛДІК ПАКЕТ
     const langDB = {
         kk: {
             mCore: "Neural Core", mRel: "Өзектілігі", mInv: "Инновация", mSet: "Настройка", mAbt: "Жоба туралы",
@@ -257,35 +285,49 @@
         let dataValues = [];
         let backgroundColors = [];
         let borderColors = [];
+        let redZones = [];
 
         for(let i=0; i<count; i++) {
             energy = energy * Math.exp(-0.18);
             let val = Math.round(energy);
             dataValues.push(val);
 
+            // Түстерді бөлу және "Қызыл аймақты" анықтау
             if (val > 70) {
-                backgroundColors.push('rgba(52, 168, 83, 0.6)'); // Green
+                backgroundColors.push('rgba(52, 168, 83, 0.7)'); // Жасыл
                 borderColors.push('#34a853');
             } else if (val > 35) {
-                backgroundColors.push('rgba(251, 188, 5, 0.6)'); // Yellow
+                backgroundColors.push('rgba(251, 188, 5, 0.7)'); // Сары
                 borderColors.push('#fbbc05');
             } else {
-                backgroundColors.push('rgba(234, 67, 53, 0.6)'); // Red
+                backgroundColors.push('rgba(234, 67, 53, 0.7)'); // Қызыл
                 borderColors.push('#ea4335');
+                redZones.push(i + 1); // Қай сабақ екенін сақтау
             }
         }
 
+        // ГРАФИКТІҢ АСТЫНДАҒЫ СИПАТТАМАНЫ (ОПИСАНИЕ) ТОЛТЫРУ
+        const descBox = document.getElementById('chart-desc');
+        if (redZones.length > 0) {
+            descBox.innerHTML = `⚠️ <b>Ескерту:</b> ${redZones.join(', ')}-сабақтарда оқушының зейіні 35%-дан төмендейді (Қызыл аймақ). Бұл уақытқа жеңіл пәндерді (мысалы: Дене шынықтыру, Көркем еңбек) қою ұсынылады.`;
+            descBox.style.color = "#ea4335";
+        } else {
+            descBox.innerHTML = `✅ <b>Жақсы нәтиже:</b> Кесте оңтайлы құрылған. Қатты когнитивті шаршау шегі (Қызыл аймақ) байқалмады.`;
+            descBox.style.color = "#34a853";
+        }
+
+        // ГРАФИКТІ САЛУ
         window.cObj = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: Array.from({length: count}, (_, i) => (i+1)),
+                labels: Array.from({length: count}, (_, i) => (i+1) + '-сабақ'),
                 datasets: [{
                     data: dataValues,
                     backgroundColor: backgroundColors,
                     borderColor: borderColors,
                     borderWidth: 1,
-                    borderRadius: 5,
-                    barPercentage: 0.7
+                    borderRadius: 4,
+                    barPercentage: 0.6
                 }]
             },
             options: {
@@ -293,7 +335,7 @@
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, max: 100, grid: { color: '#303134' }, ticks: { font: { size: 10 } } },
+                    y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } },
                     x: { grid: { display: false }, ticks: { font: { size: 10 } } }
                 }
             }
@@ -303,4 +345,3 @@
 
 </body>
 </html>
-
